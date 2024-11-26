@@ -85,6 +85,18 @@ public class CodeConverter {
                     modifiedMethods.add(md.getNameAsString());
                 }
 
+                // Check for methods with @ABC annotation and modify return statement
+                if (md.getAnnotationByName("ABC").isPresent()) {
+                    md.getBody().ifPresent(body -> {
+                        body.findAll(ReturnStmt.class).forEach(returnStmt -> {
+                            if (returnStmt.getExpression().isPresent() && returnStmt.getExpression().get() instanceof StringLiteralExpr) {
+                                StringLiteralExpr returnValue = (StringLiteralExpr) returnStmt.getExpression().get();
+                                returnValue.setString("forward:" + returnValue.getValue());
+                            }
+                        });
+                    });
+                }
+
                 return super.visit(md, arg);
             }
 
